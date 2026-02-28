@@ -20,3 +20,9 @@ git commit -m 'feat(config): add config file'
 git push -u origin feat/config
 
 END HERE
+
+git switch -c feat/logger
+
+git add .
+
+git commit -m 'feat(logger): add logger'
