@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from mysql.connector.connection import MySQLConnection
 
 from app.models.user import User
@@ -39,7 +39,7 @@ class AuthRepository:
                 email,
                 hashed_password,
                 otp,
-                datetime.now(datetime.timezone.utc)
+                datetime.now(timezone.utc)
             )
         )
         self.db.commit()

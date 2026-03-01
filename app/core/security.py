@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import secrets
 import string
+import hashlib
 
 from app.core.config import settings
 
@@ -14,12 +15,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # Password Hashing
 # -------------------------
 
+def normalize_password(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    normalized = normalize_password(password)
+    return pwd_context.hash(normalized)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    normalized = normalize_password(plain_password)
+    return pwd_context.verify(normalized, hashed_password)
 
 
 # -------------------------
@@ -28,7 +34,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(datetime.timezone.utc) + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": expire, "type": "access"})
@@ -37,7 +43,7 @@ def create_access_token(data: dict) -> str:
 
 def create_refresh_token(data: dict) -> str:
     to_encode = data.copy()
-    expire = datetime.now(datetime.timezone.utc) + timedelta(
+    expire = datetime.now(timezone.utc) + timedelta(
         days=settings.REFRESH_TOKEN_EXPIRE_DAYS
     )
     to_encode.update({"exp": expire, "type": "refresh"})
