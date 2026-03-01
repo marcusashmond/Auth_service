@@ -39,7 +39,7 @@ class AuthRepository:
                 email,
                 hashed_password,
                 otp,
-                datetime.utcnow()
+                datetime.now(datetime.timezone.utc)
             )
         )
         self.db.commit()
@@ -55,7 +55,7 @@ class AuthRepository:
 
     def get_user_by_email(self, email: str) -> Optional[User]:
         cursor = self.db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+        cursor.execute("SELECT * FROM users WHERE email = %s LIMIT 1", (email,))
         row = cursor.fetchone()
         cursor.close()
 
@@ -69,7 +69,7 @@ class AuthRepository:
 
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         cursor = self.db.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        cursor.execute("SELECT * FROM users WHERE id = %s LIMIT 1", (user_id,))
         row = cursor.fetchone()
         cursor.close()
 
@@ -87,6 +87,7 @@ class AuthRepository:
             UPDATE users
             SET is_verified = TRUE, otp = NULL
             WHERE email = %s
+                LIMIT 1
         """
         cursor.execute(query, (email,))
         self.db.commit()
